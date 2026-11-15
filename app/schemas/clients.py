@@ -2,98 +2,46 @@
 
 Deserialization = turning incoming JSON into a validated Python object (ClientCreate, ClientUpdate).
 Serialization   = turning a database row into the JSON we choose to send back (ClientOut).
+Field rules live in app/validate.py.
 """
-import re
 from datetime import date, datetime
-from typing import Literal, Optional
+from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, computed_field, field_validator
+from pydantic import BaseModel, Field, computed_field
 
-# Same rule as the DB check constraint on clients.phone
-E164 = re.compile(r"^\+[1-9][0-9]{7,14}$")
-MIN_DOB = date(1900, 1, 2)  # DB rule: dob > 1900-01-01
-
-Source = Literal["match_form", "whatsapp", "web"]
-
-
-def _clean_name(v):
-    if v is None:
-        return None
-    v = " ".join(v.split())  # trim + collapse inner whitespace
-    return v or None  # "" -> None
+from app.validate import (
+    ClientSource,
+    InputModel,
+    OptionalDob,
+    OptionalEmail,
+    OptionalName,
+    OptionalReferralCode,
+    Phone,
+)
 
 
-def _check_dob(v):
-    if v is None:
-        return None
-    if v < MIN_DOB:
-        raise ValueError("dob must be after 1900-01-01")
-    if v > date.today():
-        raise ValueError("dob cannot be in the future")
-    return v
+class ClientCreate(InputModel):
+    phone: Phone = Field(examples=["+919876543210"])
+    first_name: OptionalName = None
+    last_name: OptionalName = None
+    dob: OptionalDob = None
+    email: OptionalEmail = None
+    source: ClientSource
+    referral_code: OptionalReferralCode = Field(default=None, examples=["PARTNERX"])
 
 
-class _Input(BaseModel):
-    # forbid = reject unknown fields, e.g. a client sending "phone_verified_at"
-    model_config = ConfigDict(extra="forbid")
-
-
-class ClientCreate(_Input):
-    phone: str = Field(examples=["+919876543210"])
-    first_name: Optional[str] = Field(default=None, max_length=100)
-    last_name: Optional[str] = Field(default=None, max_length=100)
-    dob: Optional[date] = None
-    email: Optional[EmailStr] = None
-    source: Source
-    referral_code: Optional[str] = Field(default=None, examples=["PARTNERX"])
-
-    @field_validator("phone", mode="before")
-    @classmethod
-    def normalize_phone(cls, v):
-        if not isinstance(v, str):
-            raise ValueError("phone must be a string")
-        v = re.sub(r"[\s\-()]", "", v)  # "+91 98765-43210" -> "+919876543210"
-        if not E164.match(v):
-            raise ValueError("phone must be international format, e.g. +919876543210")
-        return v
-
-    _names = field_validator("first_name", "last_name", mode="before")(_clean_name)
-    _dob = field_validator("dob")(_check_dob)
-
-    @field_validator("email")
-    @classmethod
-    def lower_email(cls, v):
-        return v.lower() if v else v
-
-    @field_validator("referral_code", mode="before")
-    @classmethod
-    def normalize_code(cls, v):
-        if v is None:
-            return None
-        v = str(v).strip().upper()
-        return v or None
-
-
-class ClientUpdate(_Input):
+class ClientUpdate(InputModel):
     """PATCH: send only the fields you want to change. Send null to clear a field.
 
     phone, source and referral_code are NOT editable here on purpose:
     - phone is the login identity; changing it needs its own OTP flow.
     - referral attribution set after signup is a fraud vector.
     """
-    first_name: Optional[str] = Field(default=None, max_length=100)
-    last_name: Optional[str] = Field(default=None, max_length=100)
-    dob: Optional[date] = None
-    email: Optional[EmailStr] = None
-
-    _names = field_validator("first_name", "last_name", mode="before")(_clean_name)
-    _dob = field_validator("dob")(_check_dob)
-
-    @field_validator("email")
-    @classmethod
-    def lower_email(cls, v):
-        return v.lower() if v else v
+    first_name: OptionalName = None
+    last_name: OptionalName = None
+    dob: OptionalDob = None
+    email: OptionalEmail = None
 
 
 class ClientOut(BaseModel):

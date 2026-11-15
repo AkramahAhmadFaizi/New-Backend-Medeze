@@ -20,10 +20,12 @@ app/
   config.py             loads + validates .env
   db.py                 one shared Supabase client
   errors.py             consistent error responses, DB error mapping
+  validate.py           shared field types + allowed values (all schemas use these)
   schemas/clients.py    ClientCreate, ClientUpdate (input), ClientOut (output)
   services/clients.py   create / get / update logic
   routers/health.py     GET /health, GET /health/db
   routers/clients.py    POST /clients, GET /clients/{id}, PATCH /clients/{id}
+tests/test_validate.py   unit tests for validate.py (no DB needed)
 therapy-api.postman_collection.json   import into Postman
 ```
 
@@ -47,6 +49,18 @@ therapy-api.postman_collection.json   import into Postman
 2. Fill in `.env` (SUPABASE_URL without /rest/v1, SUPABASE_SECRET_KEY = sb_secret_...)
 3. `.\.venv\Scripts\Activate.ps1`
 4. `uvicorn app.main:app --reload`   (restart manually after editing .env)
+
+## Validation (app/validate.py)
+Write field rules once, reuse everywhere. New schemas must import types from here:
+`Phone`, `Email`, `Name`, `Dob`, `Timestamp`, `ReferralCode`, `CouponCode`, `Money`, `Url`, `TagList`, ...
+plus `Optional*` variants and Literal types for every DB CHECK constraint.
+All request models extend `InputModel` (rejects unknown fields).
+
+## Tests
+```
+pip install -r requirements-dev.txt
+pytest -v
+```
 
 ## Troubleshooting
 `db_permission` / 42501 -> run in Supabase SQL Editor:
