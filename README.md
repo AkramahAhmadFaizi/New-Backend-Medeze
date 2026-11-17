@@ -1,7 +1,7 @@
 # Therapy Platform API (FastAPI + Supabase)
 
 Backend layer between callers (Postman / future frontend) and Supabase.
-Status: **clients endpoints â€” create, read, update.** No auth yet: local only, do not deploy.
+Status: **clients endpoints - create, read, update.** No auth yet: local only, do not deploy.
 
 ## Request flow
 ```
@@ -61,6 +61,9 @@ All request models extend `InputModel` (rejects unknown fields).
 pip install -r requirements-dev.txt
 pytest -v
 ```
+
+## Database migrations
+Schema changes go through Flyway. See `db/README.md`.
 
 ## Troubleshooting
 `db_permission` / 42501 -> run in Supabase SQL Editor:
