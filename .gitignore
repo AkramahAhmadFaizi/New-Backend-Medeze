@@ -1,8 +1,8 @@
-$gitignore = @'
 # ---- Secrets (never commit) ----
 .env
 .env.*
 !.env.example
+!.env.*.example
 *.pem
 *.key
 
@@ -40,8 +40,3 @@ desktop.ini
 # ---- Supabase CLI local state (for future migrations) ----
 supabase/.branches/
 supabase/.temp/
-'@
-[IO.File]::WriteAllText((Join-Path $PWD.Path ".gitignore"), $gitignore)
-
-setup.ps1
-therapy-api.postman_collection.json
