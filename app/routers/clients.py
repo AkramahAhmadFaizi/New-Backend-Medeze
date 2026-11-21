@@ -8,6 +8,7 @@ from app.services import clients as service
 
 router = APIRouter(prefix="/clients", tags=["clients"])
 
+#Client
 
 @router.post("", response_model=ClientOut, status_code=status.HTTP_201_CREATED)
 def create_client(body: ClientCreate):
@@ -22,3 +23,6 @@ def get_client(client_id: UUID):
 @router.patch("/{client_id}", response_model=ClientOut)
 def update_client(client_id: UUID, body: ClientUpdate):
     return service.update_client(client_id, body)
+
+#referaal
+
