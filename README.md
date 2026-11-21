@@ -1,7 +1,7 @@
 # Therapy Platform API (FastAPI + Supabase)
 
 Backend layer between callers (Postman / future frontend) and Supabase.
-Status: **clients endpoints - create, read, update.** No auth yet: local only, do not deploy.
+Status: **clients endpoints - create, read, update; coupon check.** No auth yet: local only, do not deploy.
 
 ## Request flow
 ```
@@ -25,6 +25,10 @@ app/
   services/clients.py   create / get / update logic
   routers/health.py     GET /health, GET /health/db
   routers/clients.py    POST /clients, GET /clients/{id}, PATCH /clients/{id}
+  schemas/coupons.py    CouponCheck (input), CouponCheckOut (output)
+  services/coupons.py   coupon rules + discount math
+  routers/coupons.py    POST /coupons/check
+db/seed/coupons_local.sql   grants + test coupons (LOCAL Docker only)
 tests/test_validate.py   unit tests for validate.py (no DB needed)
 therapy-api.postman_collection.json   import into Postman
 ```
@@ -35,6 +39,7 @@ therapy-api.postman_collection.json   import into Postman
 | POST | /clients | phone + source required. Accepts `referral_code` (e.g. "PARTNERX"), not a UUID |
 | GET | /clients/{id} | 404 if missing |
 | PATCH | /clients/{id} | Only first_name, last_name, dob, email. Send `null` to clear |
+| POST | /coupons/check | `code`, `client_id`, `amount` (+ `therapist_id` if coupon is therapist-specific). Read-only: returns discount + final price, reserves nothing |
 
 ## Rules enforced
 - phone: international format; spaces/dashes stripped; unique (409 on duplicate)
@@ -43,6 +48,15 @@ therapy-api.postman_collection.json   import into Postman
 - source: match_form | whatsapp | web
 - unknown fields rejected (e.g. phone_verified_at cannot be set by callers)
 - phone, source, referral_code cannot be changed via PATCH
+
+## Coupon check rules (in order)
+404 `coupon_not_found` -> 422 `coupon_inactive` / `coupon_not_started` / `coupon_expired` /
+`below_min_amount` / `wrong_therapist` -> 404 `client_not_found` -> 422 `first_session_only`
+(client has a confirmed/completed/no_show session) / `coupon_exhausted` / `client_limit_reached`
+(reserved + used redemptions count; released do not).
+Percent discount is capped by `max_discount`; no discount ever exceeds the amount.
+
+**Is it working?** Step-by-step checks for setup and the coupon flow: see [TESTING.md](TESTING.md).
 
 ## Setup (Windows, VS Code terminal)
 1. `powershell -ExecutionPolicy Bypass -File .\setup.ps1`
@@ -70,6 +84,7 @@ Schema changes go through Flyway. See `db/README.md`.
 ```sql
 grant select, insert, update on public.clients to service_role;
 grant select on public.referral_codes to service_role;
+grant select on public.coupons, public.coupon_redemptions, public.sessions to service_role;
 ```
 
 ## Security rules
