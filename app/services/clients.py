@@ -1,4 +1,5 @@
 """Business logic for clients. Routers call these; these call Supabase."""
+from os import name
 from uuid import UUID
 
 from app.db import get_supabase
@@ -17,7 +18,6 @@ def _resolve_referral_code(code: str) -> str:
     if not res.data[0]["is_active"]:
         raise AppError(422, "inactive_referral_code", f"Referral code '{code}' is no longer active.")
     return res.data[0]["id"]
-
 
 def create_client(data: ClientCreate) -> ClientOut:
     row = data.model_dump(mode="json", exclude={"referral_code"})

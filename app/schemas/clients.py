@@ -63,6 +63,7 @@ class ClientOut(BaseModel):
         return self.phone_verified_at is not None
 
 
+
 # Columns we read from the DB. Explicit list instead of "*" so new
 # sensitive columns are never leaked by accident.
 CLIENT_COLUMNS = (

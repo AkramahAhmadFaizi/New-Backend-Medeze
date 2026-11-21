@@ -1,9 +1,16 @@
 # ---- Secrets (never commit) ----
 .env
 .env.*
-!.env.*example
+!.env.example
+!.env.*.example
 *.pem
 *.key
+*.p12
+*.pfx
+# Postman environments/globals can hold tokens and passwords.
+# (The collection itself, therapy-api.postman_collection.json, IS committed.)
+*.postman_environment.json
+*.postman_globals.json
 
 # ---- Python ----
 __pycache__/
@@ -17,12 +24,11 @@ dist/
 venv/
 env/
 
-# ---- Node ----
-node_modules/
-
 # ---- Tests, type checkers, linters ----
 .pytest_cache/
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
 .mypy_cache/
 .ruff_cache/
@@ -36,11 +42,17 @@ htmlcov/
 !.vscode/extensions.json
 .idea/
 .DS_Store
+._*
 Thumbs.db
 desktop.ini
 
-# ---- Local-only tooling / data ----
-.claude/
-supabase/
-db/seed/*_local.sql
-setup.ps1
+# ---- Supabase CLI local state (for future migrations) ----
+supabase/.branches/
+supabase/.temp/
+
+# ---- Claude Code (personal settings; claude.md IS committed) ----
+.claude/settings.local.json
+
+# ---- Medisina contract ----
+# portal-backend/swagger.json IS committed on purpose: after
+# `python portal-backend/contract.py pull`, `git diff` shows what Medisina changed.
