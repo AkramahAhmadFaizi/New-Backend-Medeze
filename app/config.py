@@ -14,11 +14,13 @@ class Settings(BaseSettings):
     @field_validator("supabase_url")
     @classmethod
     def check_url(cls, v: str) -> str:
-        v = v.rstrip("/")
-        if not v.startswith("https://") or "/rest/v1" in v:
+        v = v.strip().rstrip("/")
+        # http is allowed only for the local Docker stack (supabase start).
+        local = v.startswith(("http://127.0.0.1", "http://localhost"))
+        if not (v.startswith("https://") or local) or "/rest/v1" in v:
             raise ValueError(
                 "SUPABASE_URL must be the project URL, e.g. "
-                "https://abcd.supabase.co (without /rest/v1)"
+                "https://abcd.supabase.co or http://127.0.0.1:54321 (without /rest/v1)"
             )
         return v
 

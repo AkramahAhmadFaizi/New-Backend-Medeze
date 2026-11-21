@@ -1,8 +1,7 @@
 # ---- Secrets (never commit) ----
 .env
 .env.*
-!.env.example
-!.env.*.example
+!.env.*example
 *.pem
 *.key
 
@@ -17,6 +16,9 @@ dist/
 .venv/
 venv/
 env/
+
+# ---- Node ----
+node_modules/
 
 # ---- Tests, type checkers, linters ----
 .pytest_cache/
@@ -37,6 +39,8 @@ htmlcov/
 Thumbs.db
 desktop.ini
 
-# ---- Supabase CLI local state (for future migrations) ----
-supabase/.branches/
-supabase/.temp/
+# ---- Local-only tooling / data ----
+.claude/
+supabase/
+db/seed/*_local.sql
+setup.ps1
