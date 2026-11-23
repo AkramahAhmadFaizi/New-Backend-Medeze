@@ -42,7 +42,10 @@ therapy-api.postman_collection.json   import into Postman
 | GET | /clients/{id} | 404 if missing |
 | PATCH | /clients/{id} | Only first_name, last_name, dob, email. Send `null` to clear |
 | GET | /doctors | From Medisina. Optional `q`, `specialty_id`, `city`, `language`, `limit` (1-100), `offset` |
+| GET | /specialties | From Medisina. All specialties (use `specialty_id` on `/doctors`) |
 | GET | /doctors/{doctor_id}/slots | From Medisina. Optional `date` (YYYY-MM-DD). Slots in UTC + doctor's local time |
+| POST | /bookings | Books a slot in Medisina AND the new DB (see `DATABASE_SYNC.md`) |
+| GET | /bookings/{session_id} | The session as stored in the new DB |
 
 ## Rules enforced
 - phone: international format; spaces/dashes stripped; unique (409 on duplicate)
@@ -77,6 +80,13 @@ pytest -v
 - Contract tools: `python portal-backend/contract.py show "<path>" | check | pull` (see `portal-backend/README.md`).
 - Errors: Medisina 4xx pass through as `medisina_<code>`; our login failing -> 502 `medisina_auth_failed`;
   down -> 502 `medisina_unreachable`; slow -> 504 `medisina_timeout`.
+
+## Run in Docker (local)
+```
+docker compose up --build
+```
+Swagger UI: http://localhost:8000/docs . Uses `.env`; Supabase and Medisina are remote, only the API runs in Docker.
+Apply `db/migrations/V20261123150000__medisina_link.sql` first (`.\dblyway.ps1 migrate`).
 
 ## Database migrations
 Schema changes go through Flyway. See `db/README.md`.

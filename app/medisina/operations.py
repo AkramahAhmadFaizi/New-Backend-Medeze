@@ -28,7 +28,11 @@ class Op:
 LOGIN = Op("POST", "/auth/login", auth=False)
 REFRESH = Op("POST", "/auth/refresh", auth=False)
 
+# ---- Specialties ----
+LIST_SPECIALTIES = Op("GET", "/specialties")
+
 # ---- Doctors ----
+GET_DOCTOR = Op("GET", "/doctors/{id}")
 SEARCH_DOCTORS = Op(
     "GET",
     "/doctors/search",
@@ -42,7 +46,14 @@ GET_AVAILABLE_SLOTS = Op(
     query=("date",),
 )
 
+CREATE_APPOINTMENT = Op("POST", "/appointments")
+GET_APPOINTMENT = Op("GET", "/appointments/{id}")
+CANCEL_APPOINTMENT = Op("DELETE", "/appointments/{id}")
+
 # ---- Add new operations below, one per Medisina endpoint you need ----
 
 
-ALL_OPS: list[Op] = [LOGIN, REFRESH, SEARCH_DOCTORS, GET_AVAILABLE_SLOTS]
+ALL_OPS: list[Op] = [
+    LOGIN, REFRESH, LIST_SPECIALTIES, GET_DOCTOR, SEARCH_DOCTORS,
+    GET_AVAILABLE_SLOTS, CREATE_APPOINTMENT, GET_APPOINTMENT, CANCEL_APPOINTMENT,
+]

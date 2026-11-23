@@ -15,6 +15,18 @@
   {
    "key": "doctor_id",
    "value": ""
+  },
+  {
+   "key": "specialty_id",
+   "value": ""
+  },
+  {
+   "key": "slot_start_utc",
+   "value": ""
+  },
+  {
+   "key": "session_id",
+   "value": ""
   }
  ],
  "item": [
@@ -762,6 +774,219 @@
         "type": "text/javascript",
         "exec": [
          "pm.test('status 422', () => pm.response.to.have.status(422));"
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Booking flow (Medisina + Supabase)",
+   "item": [
+    {
+     "name": "1. Create client (set client_id)",
+     "request": {
+      "method": "POST",
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       }
+      ],
+      "url": {
+       "raw": "{{base_url}}/clients",
+       "host": [
+        "{{base_url}}"
+       ],
+       "path": [
+        "clients"
+       ]
+      },
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"phone\": \"+91 90000 00077\",\n  \"first_name\": \"Flow\",\n  \"source\": \"web\"\n}"
+      }
+     },
+     "event": [
+      {
+       "listen": "test",
+       "script": {
+        "type": "text/javascript",
+        "exec": [
+         "if (pm.response.code === 201) { pm.collectionVariables.set('client_id', pm.response.json().id); }",
+         "pm.test('201 Created', () => pm.response.to.have.status(201));"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "name": "2. List specialties",
+     "request": {
+      "method": "GET",
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       }
+      ],
+      "url": {
+       "raw": "{{base_url}}/specialties",
+       "host": [
+        "{{base_url}}"
+       ],
+       "path": [
+        "specialties"
+       ]
+      }
+     },
+     "event": [
+      {
+       "listen": "test",
+       "script": {
+        "type": "text/javascript",
+        "exec": [
+         "const s = pm.response.json().specialties; if (s && s.length) { pm.collectionVariables.set('specialty_id', s[0].specialty_id); }",
+         "pm.test('status 200', () => pm.response.to.have.status(200));"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "name": "3. Experts for specialty",
+     "request": {
+      "method": "GET",
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       }
+      ],
+      "url": {
+       "raw": "{{base_url}}/doctors?specialty_id={{specialty_id}}",
+       "host": [
+        "{{base_url}}"
+       ],
+       "path": [
+        "doctors?specialty_id={{specialty_id}}"
+       ]
+      }
+     },
+     "event": [
+      {
+       "listen": "test",
+       "script": {
+        "type": "text/javascript",
+        "exec": [
+         "const d = pm.response.json().doctors; if (d && d.length) { pm.collectionVariables.set('doctor_id', d[0].doctor_id); }",
+         "pm.test('status 200', () => pm.response.to.have.status(200));"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "name": "4. Doctor slots",
+     "request": {
+      "method": "GET",
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       }
+      ],
+      "url": {
+       "raw": "{{base_url}}/doctors/{{doctor_id}}/slots",
+       "host": [
+        "{{base_url}}"
+       ],
+       "path": [
+        "doctors",
+        "{{doctor_id}}",
+        "slots"
+       ]
+      }
+     },
+     "event": [
+      {
+       "listen": "test",
+       "script": {
+        "type": "text/javascript",
+        "exec": [
+         "const s = pm.response.json().slots; if (s && s.length) { pm.collectionVariables.set('slot_start_utc', s[0].start_utc); }",
+         "pm.test('status 200', () => pm.response.to.have.status(200));"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "name": "5. Book slot (both DBs)",
+     "request": {
+      "method": "POST",
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       }
+      ],
+      "url": {
+       "raw": "{{base_url}}/bookings",
+       "host": [
+        "{{base_url}}"
+       ],
+       "path": [
+        "bookings"
+       ]
+      },
+      "body": {
+       "mode": "raw",
+       "raw": "{\n  \"client_id\": \"{{client_id}}\",\n  \"doctor_id\": {{doctor_id}},\n  \"slot_start_utc\": \"{{slot_start_utc}}\",\n  \"concern\": \"Feeling anxious\",\n  \"appointment_type\": \"VIDEO\"\n}"
+      }
+     },
+     "event": [
+      {
+       "listen": "test",
+       "script": {
+        "type": "text/javascript",
+        "exec": [
+         "if (pm.response.code === 201) { pm.collectionVariables.set('session_id', pm.response.json().session_id); }",
+         "pm.test('201 Created', () => pm.response.to.have.status(201));"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "name": "6. Get booking",
+     "request": {
+      "method": "GET",
+      "header": [
+       {
+        "key": "Content-Type",
+        "value": "application/json"
+       }
+      ],
+      "url": {
+       "raw": "{{base_url}}/bookings/{{session_id}}",
+       "host": [
+        "{{base_url}}"
+       ],
+       "path": [
+        "bookings",
+        "{{session_id}}"
+       ]
+      }
+     },
+     "event": [
+      {
+       "listen": "test",
+       "script": {
+        "type": "text/javascript",
+        "exec": [
+         "pm.test('status 200', () => pm.response.to.have.status(200));"
         ]
        }
       }
