@@ -5,4 +5,4 @@ pydantic==2.14.3
 pydantic-settings==2.16.3
 email-validator==2.4.0
 httpx==0.28.1
-tzdata==2025.2   # timezone data for zoneinfo (Windows has none built in)
+PyJWT==2.15.1

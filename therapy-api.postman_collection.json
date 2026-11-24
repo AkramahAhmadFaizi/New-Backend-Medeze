@@ -1,773 +1,768 @@
 {
- "info": {
-  "name": "Therapy Platform API (local)",
-  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
- },
- "variable": [
-  {
-   "key": "base_url",
-   "value": "http://127.0.0.1:8000"
+  "info": {
+    "name": "Therapy Platform API (local)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  {
-   "key": "client_id",
-   "value": ""
-  },
-  {
-   "key": "doctor_id",
-   "value": ""
-  }
- ],
- "item": [
-  {
-   "name": "Health",
-   "item": [
+  "variable": [
     {
-     "name": "Server health",
-     "request": {
-      "method": "GET",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/health",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "health"
-       ]
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 200', () => pm.response.to.have.status(200));"
-        ]
-       }
-      }
-     ]
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
     },
     {
-     "name": "Database health",
-     "request": {
-      "method": "GET",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/health/db",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "health",
-        "db"
-       ]
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 200', () => pm.response.to.have.status(200));"
-        ]
-       }
-      }
-     ]
+      "key": "client_id",
+      "value": ""
     },
     {
-     "name": "Medisina health",
-     "request": {
-      "method": "GET",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/health/medisina",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "health",
-        "medisina"
-       ]
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 200', () => pm.response.to.have.status(200));"
-        ]
-       }
-      }
-     ]
+      "key": "test_phone",
+      "value": "+919000000011"
+    },
+    {
+      "key": "otp_code",
+      "value": ""
+    },
+    {
+      "key": "access_token",
+      "value": ""
     }
-   ]
-  },
-  {
-   "name": "Clients - happy path",
-   "item": [
+  ],
+  "item": [
     {
-     "name": "1. Create client",
-     "request": {
-      "method": "POST",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/clients",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "clients"
-       ]
-      },
-      "body": {
-       "mode": "raw",
-       "raw": "{\n  \"phone\": \"+91 90000 00001\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\",\n  \"email\": \"Test.User@Example.com\",\n  \"source\": \"web\",\n  \"referral_code\": \"partnerx\"\n}"
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "if (pm.response.code === 201) { pm.collectionVariables.set('client_id', pm.response.json().id); }",
-         "pm.test('201 Created', () => pm.response.to.have.status(201));"
-        ]
-       }
-      }
-     ]
-    },
-    {
-     "name": "2. Get client",
-     "request": {
-      "method": "GET",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/clients/{{client_id}}",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "clients",
-        "{{client_id}}"
-       ]
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 200', () => pm.response.to.have.status(200));"
-        ]
-       }
-      }
-     ]
-    },
-    {
-     "name": "3. Update client",
-     "request": {
-      "method": "PATCH",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/clients/{{client_id}}",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "clients",
-        "{{client_id}}"
-       ]
-      },
-      "body": {
-       "mode": "raw",
-       "raw": "{\n  \"last_name\": \"Updated\",\n  \"dob\": \"1995-06-15\"\n}"
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 200', () => pm.response.to.have.status(200));"
-        ]
-       }
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "name": "Clients - should fail",
-   "item": [
-    {
-     "name": "Duplicate phone -> 409",
-     "request": {
-      "method": "POST",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/clients",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "clients"
-       ]
-      },
-      "body": {
-       "mode": "raw",
-       "raw": "{\n  \"phone\": \"+919000000001\",\n  \"source\": \"web\"\n}"
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 409', () => pm.response.to.have.status(409));"
-        ]
-       }
-      }
-     ]
-    },
-    {
-     "name": "Bad phone -> 422",
-     "request": {
-      "method": "POST",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/clients",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "clients"
-       ]
-      },
-      "body": {
-       "mode": "raw",
-       "raw": "{\n  \"phone\": \"9000000001\",\n  \"source\": \"web\"\n}"
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 422', () => pm.response.to.have.status(422));"
-        ]
-       }
-      }
-     ]
-    },
-    {
-     "name": "Bad source -> 422",
-     "request": {
-      "method": "POST",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/clients",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "clients"
-       ]
-      },
-      "body": {
-       "mode": "raw",
-       "raw": "{\n  \"phone\": \"+919000000002\",\n  \"source\": \"instagram\"\n}"
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 422', () => pm.response.to.have.status(422));"
-        ]
-       }
-      }
-     ]
-    },
-    {
-     "name": "Sets phone_verified_at -> 422",
-     "request": {
-      "method": "POST",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/clients",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "clients"
-       ]
-      },
-      "body": {
-       "mode": "raw",
-       "raw": "{\n  \"phone\": \"+919000000002\",\n  \"source\": \"web\",\n  \"phone_verified_at\": \"2026-01-01T00:00:00Z\"\n}"
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 422', () => pm.response.to.have.status(422));"
-        ]
-       }
-      }
-     ]
-    },
-    {
-     "name": "Unknown referral code -> 422",
-     "request": {
-      "method": "POST",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/clients",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "clients"
-       ]
-      },
-      "body": {
-       "mode": "raw",
-       "raw": "{\n  \"phone\": \"+919000000002\",\n  \"source\": \"web\",\n  \"referral_code\": \"NOSUCHCODE\"\n}"
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 422', () => pm.response.to.have.status(422));"
-        ]
-       }
-      }
-     ]
-    },
-    {
-     "name": "Future dob -> 422",
-     "request": {
-      "method": "POST",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/clients",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "clients"
-       ]
-      },
-      "body": {
-       "mode": "raw",
-       "raw": "{\n  \"phone\": \"+919000000002\",\n  \"source\": \"web\",\n  \"dob\": \"2099-01-01\"\n}"
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 422', () => pm.response.to.have.status(422));"
-        ]
-       }
-      }
-     ]
-    },
-    {
-     "name": "Patch phone -> 422",
-     "request": {
-      "method": "PATCH",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/clients/{{client_id}}",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "clients",
-        "{{client_id}}"
-       ]
-      },
-      "body": {
-       "mode": "raw",
-       "raw": "{\n  \"phone\": \"+919999999999\"\n}"
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 422', () => pm.response.to.have.status(422));"
-        ]
-       }
-      }
-     ]
-    },
-    {
-     "name": "Patch empty -> 400",
-     "request": {
-      "method": "PATCH",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/clients/{{client_id}}",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "clients",
-        "{{client_id}}"
-       ]
-      },
-      "body": {
-       "mode": "raw",
-       "raw": "{}"
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 400', () => pm.response.to.have.status(400));"
-        ]
-       }
-      }
-     ]
-    },
-    {
-     "name": "Get unknown id -> 404",
-     "request": {
-      "method": "GET",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/clients/00000000-0000-0000-0000-000000000000",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "clients",
-        "00000000-0000-0000-0000-000000000000"
-       ]
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 404', () => pm.response.to.have.status(404));"
-        ]
-       }
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "name": "Doctors (Medisina) - happy path",
-   "item": [
-    {
-     "name": "1. List doctors",
-     "request": {
-      "method": "GET",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/doctors?limit=10&offset=0",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "doctors"
-       ],
-       "query": [
+      "name": "Health",
+      "item": [
         {
-         "key": "limit",
-         "value": "10"
+          "name": "Server health",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
-         "key": "offset",
-         "value": "0"
+          "name": "Database health",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/health/db",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                "db"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         }
-       ]
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 200', () => pm.response.to.have.status(200));",
-         "const docs = pm.response.json().doctors;",
-         "pm.test('has doctors', () => pm.expect(docs.length).to.be.above(0));",
-         "if (docs.length) pm.collectionVariables.set('doctor_id', docs[0].doctor_id);"
-        ]
-       }
-      }
-     ]
+      ]
     },
     {
-     "name": "2. Selected doctor's slots",
-     "request": {
-      "method": "GET",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/doctors/{{doctor_id}}/slots?date=2026-11-25",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "doctors",
-        "{{doctor_id}}",
-        "slots"
-       ],
-       "query": [
+      "name": "Phone OTP (run first)",
+      "item": [
         {
-         "key": "date",
-         "value": "2026-11-25"
+          "name": "1. Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/otp/send",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "otp",
+                "send"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{test_phone}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 202', () => pm.response.to.have.status(202));",
+                  "// Fake provider: copy the code from the uvicorn terminal into the collection variable otp_code"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Verify OTP (set otp_code first)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/otp/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "otp",
+                "verify"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{test_phone}}\",\n  \"code\": \"{{otp_code}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) { pm.collectionVariables.set('access_token', pm.response.json().access_token); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Wrong code -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/otp/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "otp",
+                "verify"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{test_phone}}\",\n  \"code\": \"000000\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bad phone -> 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/otp/send",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "otp",
+                "send"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"9000000011\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
         }
-       ]
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 200', () => pm.response.to.have.status(200));",
-         "pm.test('has slots array', () => pm.expect(pm.response.json().slots).to.be.an('array'));"
-        ]
-       }
-      }
-     ]
+      ]
+    },
+    {
+      "name": "Clients - happy path (after OTP)",
+      "item": [
+        {
+          "name": "1. Create client",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{test_phone}}\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\",\n  \"email\": \"Test.User@Example.com\",\n  \"source\": \"web\",\n  \"referral_code\": \"partnerx\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) { pm.collectionVariables.set('client_id', pm.response.json().id); }",
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Get client",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients/{{client_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "{{client_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Update client",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients/{{client_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "{{client_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"last_name\": \"Updated\",\n  \"dob\": \"1995-06-15\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Clients - should fail",
+      "item": [
+        {
+          "name": "Duplicate phone -> 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{test_phone}}\",\n  \"source\": \"web\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bad phone -> 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"9000000001\",\n  \"source\": \"web\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bad source -> 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{test_phone}}\",\n  \"source\": \"instagram\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sets phone_verified_at -> 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{test_phone}}\",\n  \"source\": \"web\",\n  \"phone_verified_at\": \"2026-01-01T00:00:00Z\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unknown referral code -> 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{test_phone}}\",\n  \"source\": \"web\",\n  \"referral_code\": \"NOSUCHCODE\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Future dob -> 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{test_phone}}\",\n  \"source\": \"web\",\n  \"dob\": \"2099-01-01\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Patch phone -> 422",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients/{{client_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "{{client_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+919999999999\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Patch empty -> 400",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients/{{client_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "{{client_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get unknown id -> 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients/00000000-0000-0000-0000-000000000000",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients",
+                "00000000-0000-0000-0000-000000000000"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Clients - auth",
+      "item": [
+        {
+          "name": "Create without token -> 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{test_phone}}\",\n  \"source\": \"web\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
-   ]
-  },
-  {
-   "name": "Doctors (Medisina) - should fail",
-   "item": [
-    {
-     "name": "Limit too big -> 422",
-     "request": {
-      "method": "GET",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/doctors?limit=500",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "doctors"
-       ],
-       "query": [
-        {
-         "key": "limit",
-         "value": "500"
-        }
-       ]
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 422', () => pm.response.to.have.status(422));"
-        ]
-       }
-      }
-     ]
-    },
-    {
-     "name": "Bad date format -> 422",
-     "request": {
-      "method": "GET",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/doctors/{{doctor_id}}/slots?date=25-11-2026",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "doctors",
-        "{{doctor_id}}",
-        "slots"
-       ],
-       "query": [
-        {
-         "key": "date",
-         "value": "25-11-2026"
-        }
-       ]
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 422', () => pm.response.to.have.status(422));"
-        ]
-       }
-      }
-     ]
-    },
-    {
-     "name": "Non-numeric doctor id -> 422",
-     "request": {
-      "method": "GET",
-      "header": [
-       {
-        "key": "Content-Type",
-        "value": "application/json"
-       }
-      ],
-      "url": {
-       "raw": "{{base_url}}/doctors/abc/slots",
-       "host": [
-        "{{base_url}}"
-       ],
-       "path": [
-        "doctors",
-        "abc",
-        "slots"
-       ]
-      }
-     },
-     "event": [
-      {
-       "listen": "test",
-       "script": {
-        "type": "text/javascript",
-        "exec": [
-         "pm.test('status 422', () => pm.response.to.have.status(422));"
-        ]
-       }
-      }
-     ]
-    }
-   ]
-  }
- ]
+  ]
 }

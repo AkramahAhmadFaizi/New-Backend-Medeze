@@ -177,12 +177,19 @@ TagList = Annotated[list[Name], Field(max_length=50), AfterValidator(_dedupe)]
 
 SessionMinutes = Annotated[int, Field(ge=10, le=240)]  # DB: between 10 and 240
 
+# OTP code typed by the user: digits only
+OtpCode = Annotated[
+    str,
+    BeforeValidator(lambda v: v.strip() if isinstance(v, str) else v),
+    StringConstraints(pattern=r"^[0-9]{4,10}$"),
+]
+
 # =====================================================================
 # Allowed values  (each mirrors a CHECK constraint in the schema)
 # =====================================================================
 ClientSource = Literal["match_form", "whatsapp", "web"]
 OtpChannel = Literal["sms", "whatsapp"]
-OtpProvider = Literal["msg91", "twilio"]
+OtpProvider = Literal["msg91", "twilio", "fake", "2factor"]  # mirrors DB check (twilio/msg91 allowed by DB, not implemented)
 OtpStatus = Literal["sent", "verified", "failed", "expired"]
 ReferralOwnerType = Literal["client", "therapist", "partner"]
 DiscountType = Literal["percent", "flat"]
