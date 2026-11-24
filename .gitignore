@@ -56,3 +56,7 @@ supabase/.temp/
 # ---- Medisina contract ----
 # portal-backend/swagger.json IS committed on purpose: after
 # `python portal-backend/contract.py pull`, `git diff` shows what Medisina changed.
+
+# one-off install scripts from Claude
+update-*.ps1
+*.patch
