@@ -39,14 +39,16 @@ therapy-api.postman_collection.json   import into Postman
 |---|---|---|
 | POST | /auth/otp/send | `{phone}` -> 202. Same answer for any number. Rate limited |
 | POST | /auth/otp/verify | `{phone, code}` -> `access_token` (15 min), `client_id`, `is_new_client` |
-| POST | /clients | **Needs `Authorization: Bearer <access_token>`**; body phone must match the token. phone + source required. Accepts `referral_code` (e.g. "PARTNERX"), not a UUID |
+| POST | /clients | **Needs `Authorization: Bearer <access_token>`**; body phone must match the token. Required: phone, first_name, email, dob, source. Accepts `referral_code` (e.g. "PARTNERX"), not a UUID |
 | GET | /clients/{id} | 404 if missing |
-| PATCH | /clients/{id} | Only first_name, last_name, dob, email. Send `null` to clear |
+| PATCH | /clients/{id} | Only first_name, last_name, dob, email. Only last_name can be cleared with `null` |
 
 ## Rules enforced
 - phone: international format; spaces/dashes stripped; unique (409 on duplicate)
-- email: optional, validated, stored lowercase, duplicates allowed (matches schema)
-- dob: optional, after 1900-01-01, not in the future
+- first_name: required, max 100 chars, spaces trimmed
+- email: required, validated, stored lowercase, duplicates allowed (matches schema)
+- dob: required, after 1900-01-01, not in the future
+- last_name: optional
 - source: match_form | whatsapp | web
 - unknown fields rejected (e.g. phone_verified_at cannot be set by callers)
 - phone, source, referral_code cannot be changed via PATCH
@@ -85,6 +87,15 @@ pytest -v
 
 ## Database migrations
 Schema changes go through Flyway. See `db/README.md`.
+
+## Required client fields (DB check before migrating)
+`V20261125150000__clients_required_fields.sql` sets NOT NULL on first_name, email, dob.
+It fails (changing nothing) if any existing row is missing one. Check first:
+```sql
+select id, phone, first_name, email, dob from public.clients
+where first_name is null or email is null or dob is null;
+```
+Must return 0 rows. Fix or remove test rows first.
 
 ## Troubleshooting
 `db_permission` / 42501 -> run in Supabase SQL Editor:

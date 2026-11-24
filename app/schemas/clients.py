@@ -12,9 +12,10 @@ from pydantic import BaseModel, Field, computed_field
 
 from app.validate import (
     ClientSource,
+    Dob,
+    Email,
     InputModel,
-    OptionalDob,
-    OptionalEmail,
+    Name,
     OptionalName,
     OptionalReferralCode,
     Phone,
@@ -22,26 +23,30 @@ from app.validate import (
 
 
 class ClientCreate(InputModel):
+    """Required: phone, first_name, email, dob, source. Optional: last_name, referral_code."""
     phone: Phone = Field(examples=["+919876543210"])
-    first_name: OptionalName = None
+    first_name: Name = Field(examples=["Asha"])
     last_name: OptionalName = None
-    dob: OptionalDob = None
-    email: OptionalEmail = None
+    dob: Dob = Field(examples=["1995-06-15"])
+    email: Email = Field(examples=["asha@example.com"])
     source: ClientSource
     referral_code: OptionalReferralCode = Field(default=None, examples=["PARTNERX"])
 
 
 class ClientUpdate(InputModel):
-    """PATCH: send only the fields you want to change. Send null to clear a field.
+    """PATCH: send only the fields you want to change.
+
+    first_name, email and dob are required on a client, so they can be changed
+    but not cleared (null is rejected). last_name can be cleared with null.
 
     phone, source and referral_code are NOT editable here on purpose:
     - phone is the login identity; changing it needs its own OTP flow.
     - referral attribution set after signup is a fraud vector.
     """
-    first_name: OptionalName = None
+    first_name: Name = None   # default None = "not sent"; an explicit null is rejected
     last_name: OptionalName = None
-    dob: OptionalDob = None
-    email: OptionalEmail = None
+    dob: Dob = None
+    email: Email = None
 
 
 class ClientOut(BaseModel):
@@ -61,7 +66,6 @@ class ClientOut(BaseModel):
     @property
     def phone_verified(self) -> bool:
         return self.phone_verified_at is not None
-
 
 
 # Columns we read from the DB. Explicit list instead of "*" so new
