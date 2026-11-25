@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from app.config import get_settings
 from app.errors import register_error_handlers
 from app.medisina.client import close_medisina
-from app.routers import clients, doctors, health
+from app.routers import bookings, clients, doctors, health, specialties
 
 get_settings()  # fail fast at startup if .env is missing or wrong
 
@@ -22,3 +22,5 @@ register_error_handlers(app)
 app.include_router(health.router)
 app.include_router(clients.router)
 app.include_router(doctors.router)
+app.include_router(specialties.router)
+app.include_router(bookings.router)
