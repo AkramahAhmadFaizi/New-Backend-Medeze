@@ -38,7 +38,9 @@ class Settings(BaseSettings):
     @classmethod
     def check_url(cls, v: str) -> str:
         v = v.rstrip("/")
-        if not v.startswith("https://") or "/rest/v1" in v:
+        # http:// is allowed only for the local Supabase stack (supabase start).
+        local = v.startswith(("http://127.0.0.1", "http://localhost", "http://host.docker.internal"))
+        if not (v.startswith("https://") or local) or "/rest/v1" in v:
             raise ValueError(
                 "SUPABASE_URL must be the project URL, e.g. "
                 "https://abcd.supabase.co (without /rest/v1)"
