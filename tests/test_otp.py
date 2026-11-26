@@ -14,6 +14,7 @@ from app.main import app
 from tests.fakes import FakeSupabase
 
 PHONE = "+919000000011"
+NEW_CLIENT = {"source": "web", "first_name": "Asha", "email": "asha@example.com", "dob": "1995-06-15"}
 
 
 @pytest.fixture
@@ -89,7 +90,7 @@ def test_verify_new_client_then_create(env):
     assert otp_rows(db)[0]["status"] == "verified"
 
     auth = {"Authorization": f"Bearer {body['access_token']}"}
-    created = c.post("/clients", json={"phone": PHONE, "source": "web"}, headers=auth)
+    created = c.post("/clients", json={"phone": PHONE, **NEW_CLIENT}, headers=auth)
     assert created.status_code == 201 and created.json()["phone_verified"] is True
 
 
@@ -143,9 +144,9 @@ def test_bad_code_format(env):
 # ---------------- token on POST /clients ----------------
 def test_create_client_needs_token(env):
     c, _, _ = env
-    r = c.post("/clients", json={"phone": PHONE, "source": "web"})
+    r = c.post("/clients", json={"phone": PHONE, **NEW_CLIENT})
     assert r.status_code == 401 and r.json()["error"]["code"] == "missing_token"
-    r = c.post("/clients", json={"phone": PHONE, "source": "web"}, headers={"Authorization": "Bearer junk"})
+    r = c.post("/clients", json={"phone": PHONE, **NEW_CLIENT}, headers={"Authorization": "Bearer junk"})
     assert r.status_code == 401
 
 
@@ -153,7 +154,7 @@ def test_token_for_other_phone_is_403(env):
     c, _, p = env
     send(c)
     token = verify(c, p.last_code(PHONE)).json()["access_token"]
-    r = c.post("/clients", json={"phone": "+919000000099", "source": "web"},
+    r = c.post("/clients", json={"phone": "+919000000099", **NEW_CLIENT},
                headers={"Authorization": f"Bearer {token}"})
     assert r.status_code == 403
 
@@ -162,7 +163,7 @@ def test_tampered_token_is_401(env):
     c, _, p = env
     send(c)
     token = verify(c, p.last_code(PHONE)).json()["access_token"]
-    r = c.post("/clients", json={"phone": PHONE, "source": "web"},
+    r = c.post("/clients", json={"phone": PHONE, **NEW_CLIENT},
                headers={"Authorization": f"Bearer {token[:-2]}xx"})
     assert r.status_code == 401
 
