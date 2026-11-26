@@ -85,6 +85,21 @@ pip install -r requirements-dev.txt
 pytest -v
 ```
 
+## Medisina API
+- `app/medisina/client.py` logs in (`POST /auth/login`), adds `Authorization: Bearer`, refreshes (`POST /auth/refresh`)
+  before expiry and on 401, and unwraps Medisina's `{success, data, error}` envelope. Services never touch tokens.
+- New Medisina endpoint: add an `Op` to `app/medisina/operations.py` first, then the usual schema -> service -> router flow.
+- Contract tools: `python portal-backend/contract.py show "<path>" | check | pull` (see `portal-backend/README.md`).
+- Errors: Medisina 4xx pass through as `medisina_<code>`; our login failing -> 502 `medisina_auth_failed`;
+  down -> 502 `medisina_unreachable`; slow -> 504 `medisina_timeout`.
+
+## Run in Docker (local)
+```
+docker compose up --build
+```
+Swagger UI: http://localhost:8000/docs . Uses `.env`; Supabase and Medisina are remote, only the API runs in Docker.
+Apply `db/migrations/V20261123150000__medisina_link.sql` first (`.\dblyway.ps1 migrate`).
+
 ## Database migrations
 Schema changes go through Flyway. See `db/README.md`.
 

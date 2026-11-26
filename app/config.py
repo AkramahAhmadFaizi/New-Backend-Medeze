@@ -11,6 +11,14 @@ class Settings(BaseSettings):
     supabase_url: str
     supabase_secret_key: SecretStr  # SecretStr hides the value in logs/prints
 
+    # ---- Medisina API (contract reference: portal-backend/) ----
+    # The contract has no servers list, so the base URL comes ONLY from here.
+    medisina_api_base_url: str
+    medisina_email: str
+    medisina_password: SecretStr
+    medisina_user_type: Literal["PATIENT", "DOCTOR"]
+    medisina_timeout_seconds: float = 15.0
+
     # ---- App ----
     app_env: Literal["local", "staging", "production"] = "local"
 
@@ -38,10 +46,22 @@ class Settings(BaseSettings):
     @classmethod
     def check_url(cls, v: str) -> str:
         v = v.rstrip("/")
-        if not v.startswith("https://") or "/rest/v1" in v:
+        # http:// is allowed only for the local Supabase stack (supabase start).
+        local = v.startswith(("http://127.0.0.1", "http://localhost", "http://host.docker.internal"))
+        if not (v.startswith("https://") or local) or "/rest/v1" in v:
             raise ValueError(
                 "SUPABASE_URL must be the project URL, e.g. "
                 "https://abcd.supabase.co (without /rest/v1)"
+            )
+        return v
+
+    @field_validator("medisina_api_base_url")
+    @classmethod
+    def check_medisina_url(cls, v: str) -> str:
+        v = v.strip().rstrip("/")
+        if not v.startswith(("https://", "http://")):
+            raise ValueError(
+                "MEDISINA_API_BASE_URL must be a full URL, e.g. https://api.example.com"
             )
         return v
 
