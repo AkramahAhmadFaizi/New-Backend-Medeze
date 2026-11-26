@@ -94,11 +94,13 @@ pytest -v
   down -> 502 `medisina_unreachable`; slow -> 504 `medisina_timeout`.
 
 ## Run in Docker (local)
+Full guide: [`docs/DEV_ENVIRONMENT.md`](docs/DEV_ENVIRONMENT.md).
 ```
-docker compose up --build
+.\dev.ps1 setup      # first time: local Supabase + migrations + seed + API
+.\dev.ps1 up         # every day
+docker compose up --build   # alternative: API only, against the shared cloud DB in .env
 ```
-Swagger UI: http://localhost:8000/docs . Uses `.env`; Supabase and Medisina are remote, only the API runs in Docker.
-Apply `db/migrations/V20261123150000__medisina_link.sql` first (`.\dblyway.ps1 migrate`).
+Swagger UI: http://localhost:8000/docs . The shared cloud DB is migrated with `db\flyway.ps1 migrate`.
 
 ## Database migrations
 Schema changes go through Flyway. See `db/README.md`.

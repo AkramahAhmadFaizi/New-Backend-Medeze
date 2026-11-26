@@ -1,9 +1,14 @@
 """Loads settings from the .env file and validates them at startup."""
 from functools import lru_cache
 from typing import Literal, Optional
+from urllib.parse import urlparse
 
 from pydantic import SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+# Plain http is accepted only for these hosts (local Supabase / docker compose dev env).
+LOCAL_HOSTS = {"localhost", "127.0.0.1", "host.docker.internal"}
 
 
 class Settings(BaseSettings):
@@ -47,11 +52,13 @@ class Settings(BaseSettings):
     def check_url(cls, v: str) -> str:
         v = v.rstrip("/")
         # http:// is allowed only for the local Supabase stack (supabase start).
-        local = v.startswith(("http://127.0.0.1", "http://localhost", "http://host.docker.internal"))
-        if not (v.startswith("https://") or local) or "/rest/v1" in v:
+        # Compare the parsed hostname, not a prefix: "http://localhost.evil.com" must fail.
+        u = urlparse(v)
+        local = u.scheme == "http" and u.hostname in LOCAL_HOSTS
+        if not (u.scheme == "https" or local) or "/rest/v1" in v:
             raise ValueError(
-                "SUPABASE_URL must be the project URL, e.g. "
-                "https://abcd.supabase.co (without /rest/v1)"
+                "SUPABASE_URL must be the project URL, e.g. https://abcd.supabase.co "
+                "(without /rest/v1). Plain http is allowed only for local Supabase."
             )
         return v
 
@@ -93,6 +100,8 @@ class Settings(BaseSettings):
     def check_otp_provider(self):
         if self.otp_provider == "2factor" and not self.twofactor_api_key:
             raise ValueError("OTP_PROVIDER=2factor needs: TWOFACTOR_API_KEY")
+        if self.app_env == "production" and self.supabase_url.startswith("http://"):
+            raise ValueError("APP_ENV=production needs an https SUPABASE_URL")
         if self.app_env == "production" and self.otp_provider == "fake":
             raise ValueError("OTP_PROVIDER=fake is not allowed when APP_ENV=production")
         return self

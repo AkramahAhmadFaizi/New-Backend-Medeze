@@ -1,5 +1,5 @@
 -- LOCAL DOCKER ONLY (supabase start). Do NOT run on the shared/prod database.
--- Run in local Studio -> SQL Editor (http://127.0.0.1:54323). Safe to re-run.
+-- Loaded by .\dev.ps1 seed (or run in local Studio -> SQL Editor, http://127.0.0.1:54323). Safe to re-run.
 --
 -- Part 1 = step 5 of "adding an endpoint": let the backend read the tables
 --          POST /coupons/check needs.
@@ -12,8 +12,10 @@ grant select on public.sessions           to service_role;
 grant select on public.clients            to service_role;
 
 -- ---- Part 2: test data (fixed ids so Postman can reference them) ----
-insert into public.clients (id, phone, first_name, source)
-values ('11111111-1111-1111-1111-111111111111', '+919000000099', 'Coupon', 'web')
+-- email and dob are required for clients (V20261125150000__clients_required_fields.sql)
+insert into public.clients (id, phone, first_name, email, dob, source)
+values ('11111111-1111-1111-1111-111111111111', '+919000000099', 'Coupon',
+        'coupon.seed@example.com', '1990-01-01', 'web')
 on conflict do nothing;
 
 insert into public.coupons

@@ -1,14 +1,54 @@
-# Local only. Run:  docker compose up --build   then open http://localhost:8000/docs
-# Secrets come from .env (git-ignored); they are NOT baked into the image.
+# Local only. Two ways to run (see docs/DEV_ENVIRONMENT.md):
+#   Cloud DB mode:  docker compose up --build        -> API uses the shared Supabase from .env
+#   Local DB mode:  .\dev.ps1 setup / .\dev.ps1 up   -> .env.docker points the API at LOCAL Supabase
+# Secrets come from .env / .env.docker (both git-ignored); they are NOT baked into the image.
+
+x-local-db: &local-db
+  extra_hosts:
+    - "host.docker.internal:host-gateway"   # lets containers reach local Supabase on the host (Linux too)
+
 services:
   api:
+    <<: *local-db
     build: .
     ports:
       - "8000:8000"
     env_file:
-      - .env
-      - path: .env.docker         # optional, git-ignored: overrides .env for local Docker
+      - .env                       # Medisina settings + cloud defaults
+      - path: .env.docker          # optional, git-ignored: written by .\dev.ps1, overrides .env
         required: false
+    environment:
+      WATCHFILES_FORCE_POLLING: "true"   # live reload works with Windows-mounted files
     volumes:
-      - ./app:/code/app          # edit code locally, reload inside the container
+      - ./app:/code/app            # edit code locally, reload inside the container
+      - ./tests:/code/tests        # so .\dev.ps1 test sees your latest tests
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ---- one-off tools (profile "tools"): run via .\dev.ps1, they target ONLY the local DB ----
+  flyway:
+    <<: *local-db
+    image: redgate/flyway
+    profiles: ["tools"]
+    volumes:
+      - ./db/migrations:/flyway/sql:ro
+    environment:
+      # Hard-wired to LOCAL Supabase. The shared cloud DB uses db\flyway.ps1 + .env.flyway.
+      FLYWAY_URL: jdbc:postgresql://host.docker.internal:54322/postgres
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: postgres
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+      FLYWAY_SCHEMAS: flyway
+      FLYWAY_DEFAULT_SCHEMA: flyway
+      FLYWAY_CLEAN_DISABLED: "true"
+
+  seed:
+    <<: *local-db
+    image: postgres:17-alpine
+    profiles: ["tools"]
+    volumes:
+      - ./db/seed:/seed:ro
+    environment:
+      PGPASSWORD: postgres
+    command: >
+      psql -h host.docker.internal -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1
+      -f /seed/local_seed.sql -f /seed/coupons_local.sql
