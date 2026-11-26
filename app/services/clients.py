@@ -1,5 +1,5 @@
 """Business logic for clients. Routers call these; these call Supabase."""
-from os import name
+from datetime import datetime, timezone
 from uuid import UUID
 
 from app.db import get_supabase
@@ -19,8 +19,14 @@ def _resolve_referral_code(code: str) -> str:
         raise AppError(422, "inactive_referral_code", f"Referral code '{code}' is no longer active.")
     return res.data[0]["id"]
 
-def create_client(data: ClientCreate) -> ClientOut:
+
+def create_client(data: ClientCreate, verified_phone: str) -> ClientOut:
+    # The phone in the body must be the phone the caller just verified by OTP
+    if data.phone != verified_phone:
+        raise AppError(403, "phone_mismatch", "Phone does not match the verified phone.")
+
     row = data.model_dump(mode="json", exclude={"referral_code"})
+    row["phone_verified_at"] = datetime.now(timezone.utc).isoformat()  # set by server only
     if data.referral_code:
         row["referred_by_code_id"] = _resolve_referral_code(data.referral_code)
 
